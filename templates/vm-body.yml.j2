@@ -19,21 +19,23 @@ spec:
           device_index: 0
         device_type: "CDROM"
 {% if vm.disk_list_mib %}
-{% for disk in vm.disk_list_mib.split('-') %}
+  {% for disk in vm.disk_list_mib.split('-') %}
     - device_properties:
+    {% if boot_type == "UEFI" %}    
         device_type: "DISK"
-      disk_size_mib: {{ disk }}
-{% endfor %}
+        disk_size_mib: {{ disk }}
+    {% else %}
+        device_type: "DISK"
+        disk_size_mib: {{ disk }}
+        disk_address: 
+          device_index: {{ disk.index }}
+          adapter_type: "SCSI"
+    {% endif %}    
+  {% endfor %}
 {% endif %}
     memory_size_mib: {{ vm.memory_mib }}
     boot_config:
       boot_type: "{{ boot_type }}"
-    nic_list:
-    - ip_endpoint_list:
-      - ip: {{ vm.ip }}
-      subnet_reference:
-        kind: subnet
-        uuid: {{ vm.subnet_uuid }}
     num_sockets: {{ vm.num_vcpu }}
     num_vcpus_per_socket: 1 
     power_state: 'ON'
