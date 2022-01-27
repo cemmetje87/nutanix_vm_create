@@ -22,18 +22,30 @@ spec:
 {% for disk in vm.disk_list_mib.split('-') %}
     - device_properties:
         device_type: "DISK"
+{% if boot_type == "LEGACY" %}
+        disk_address:
+          device_index: {{ loop.index }}
+          adapter_type: "SCSI"
       disk_size_mib: {{ disk }}
+{% endif %}       
 {% endfor %}
 {% endif %}
     memory_size_mib: {{ vm.memory_mib }}
-    boot_config:
-      boot_type: "{{ boot_type }}"
     nic_list:
+    - nic_type: NORMAL_NIC
+      is_connected: true
+{% if vm.ip is defined %}
     - ip_endpoint_list:
       - ip: {{ vm.ip }}
+{% endif %}
       subnet_reference:
         kind: subnet
         uuid: {{ vm.subnet_uuid }}
+    boot_config:
+      boot_device:
+        disk_address:
+          device_index: 0
+          adapter_type: "SCSI"
     num_sockets: {{ vm.num_vcpu }}
     num_vcpus_per_socket: 1 
     power_state: 'ON'
